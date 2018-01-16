@@ -14,17 +14,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests()
-		 	.antMatchers("/").access("hasRole('ROLE_USER')")
-			.antMatchers("/admin").access("hasRole('ROLE_ADMIN')")
-			.antMatchers("/dba").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_DBA')")
-			.and().formLogin();
+		 http
+         .authorizeRequests()
+             .antMatchers("/html/**","/").permitAll()
+             .anyRequest().authenticated()
+             .and()
+         .formLogin()
+         	 .loginPage("/login_page")
+             .loginProcessingUrl("/login")
+             .usernameParameter("username")
+             .passwordParameter("password")
+             .permitAll()
+             .and()
+         .logout()
+             .permitAll()
+             .and()
+         .csrf().disable();
 	}
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception{
 		auth.inMemoryAuthentication().passwordEncoder(passwordEncoder).withUser("sullay").password(passwordEncoder.encode("sullay")).roles("USER");
-		auth.inMemoryAuthentication().passwordEncoder(passwordEncoder).withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN");
-		auth.inMemoryAuthentication().passwordEncoder(passwordEncoder).withUser("dba").password(passwordEncoder.encode("dba")).roles("DBA");
 	}
 	
 	
